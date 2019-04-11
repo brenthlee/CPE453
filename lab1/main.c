@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
    int ampFlag = 0;
    while(status)
    {
-      printf(":-) ");
+      printf("osh> ");
       if(!fgets(line, 84, stdin))
       {
          if(feof(stdin))
