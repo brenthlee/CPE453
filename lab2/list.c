@@ -20,6 +20,21 @@ void insert(struct node **head, Task *newTask) {
     *head = newNode;
 }
 
+void addTail(struct node **head, Task *newTask) {
+   ListNode *newNode = malloc(sizeof(ListNode));
+   ListNode *cur = *head;
+   newNode->task = newTask;
+   newNode->next = NULL;
+   if (cur == NULL) {
+      *head = newNode;
+   } else {
+      while (cur->next != NULL) {
+         cur = (cur->next != NULL) ? cur->next : cur;
+      }
+      cur->next = newNode;
+   }
+}
+
 // delete the selected task from the list
 void delete(struct node **head, Task *task) {
     struct node *temp;
