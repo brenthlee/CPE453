@@ -23,7 +23,6 @@ void schedule(ListNode* cur) {
    int stored[size];
    for (i = 0; i < size; i++) {
       stored[i] = 0;
-
    }
    i = 0;
    int flag = 0;
