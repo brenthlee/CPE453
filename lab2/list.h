@@ -12,5 +12,6 @@ typedef struct node {
 // insert and delete operations.
 void insert(struct node **head, Task *task);
 void addTail(struct node **head, Task *newTask);
+void freeNodes(ListNode** head);
 void delete(struct node **head, Task *task);
-void traverse(struct node *head);
+int traverse(struct node *head);

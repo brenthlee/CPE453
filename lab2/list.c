@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
+//#include "cpu.h"
 #include "list.h"
 #include "task.h"
 
@@ -59,12 +60,13 @@ void delete(struct node **head, Task *task) {
 }
 
 // traverse the list
-void traverse(struct node *head) {
+int traverse(struct node *head) {
     struct node *temp;
     temp = head;
-
     while (temp != NULL) {
         printf("[%s] [%d] [%d]\n",temp->task->name, temp->task->priority, temp->task->burst);
+        //run(temp->task, temp->task->burst);
         temp = temp->next;
     }
+    return count;
 }

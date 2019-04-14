@@ -5,4 +5,4 @@
 void add(char *name, int priority, int burst, ListNode** cur);
 
 // invoke the scheduler
-void schedule(ListNode** cur);
+void schedule(ListNode* cur);

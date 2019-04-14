@@ -40,13 +40,12 @@ int main(int argc, char *argv[])
         burst = atoi(strsep(&temp,","));
         // add the task to the scheduler's list of tasks
         add(name,priority,burst,&cur);
-        free(temp);
+        //free(temp);
     }
-
     fclose(in);
 
     // invoke the scheduler
-    schedule(&cur);
-
+    schedule(cur);
+    freeNodes(&cur);
     return 0;
 }
