@@ -10,7 +10,8 @@ void add(char *name, int priority, int burst, ListNode** cur) {
    task->name = name;
    task->priority = priority;
    task->burst = burst;
-   addTail(cur, task);
+   //addTail(cur, task);
+   insert(cur, task);
 }
 
 void schedule(ListNode* cur) {
@@ -25,12 +26,13 @@ void schedule(ListNode* cur) {
       temp = head;
       tmpFlag = 0;
       while (temp != NULL) {
-         if (temp->task->burst != 0) {
+         if (temp->task->burst > 0) {
+            //TODO: How to choose the chunk time
             //run(temp->task, temp->task->burst);
             run(temp->task, 10);
             temp->task->burst -= 10;
             tmpFlag = 1;
-            if (temp->task->burst == 0) {
+            if (temp->task->burst <= 0) {
                printf("Task %s finished.\n", temp->task->name);
             }
          }
@@ -40,11 +42,6 @@ void schedule(ListNode* cur) {
          flag = 1;
       }
    }
-   while (temp != NULL) {
-      printf("[%s] [%d] [%d]\n",temp->task->name, temp->task->priority, temp->task->burst);
-      //run(temp->task, temp->task->burst);
-      temp = temp->next;
-   }   
 }
 
 void freeNodes(ListNode** cur) {

@@ -15,9 +15,13 @@
 void insert(struct node **head, Task *newTask) {
     // add the new task to the list 
     struct node *newNode = malloc(sizeof(struct node));
-
     newNode->task = newTask;
-    newNode->next = *head;
+    if (head == NULL) {
+        //newNode->next = *head;
+        newNode->next = NULL;
+    } else {
+        newNode->next = *head;
+    }
     *head = newNode;
 }
 
@@ -63,10 +67,12 @@ void delete(struct node **head, Task *task) {
 int traverse(struct node *head) {
     struct node *temp;
     temp = head;
+    int count = 0;
     while (temp != NULL) {
-        printf("[%s] [%d] [%d]\n",temp->task->name, temp->task->priority, temp->task->burst);
+        //printf("[%s] [%d] [%d]\n",temp->task->name, temp->task->priority, temp->task->burst);
         //run(temp->task, temp->task->burst);
         temp = temp->next;
+        count++;
     }
     return count;
 }

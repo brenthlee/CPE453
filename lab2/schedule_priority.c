@@ -16,7 +16,16 @@ void add(char *name, int priority, int burst, ListNode** cur) {
 void schedule(ListNode* cur) {
 //   traverse(*cur);
    ListNode *temp, *head;
-   int tmpFlag;
+   int size = traverse(cur);
+   int index, tmpFlag;
+   int i;
+   int lowPriority, lowIndex;
+   int stored[size];
+   for (i = 0; i < size; i++) {
+      stored[i] = 0;
+
+   }
+   i = 0;
    int flag = 0;
    head = cur;
    temp = head;
@@ -24,27 +33,29 @@ void schedule(ListNode* cur) {
    while (!flag) {
       temp = head;
       tmpFlag = 0;
+      index = 0;
+      lowIndex = -1;
+      lowPriority = 50000;
       while (temp != NULL) {
-         if (temp->task->burst != 0) {
-            //run(temp->task, temp->task->burst);
-            run(temp->task, 10);
-            temp->task->burst -= 10;
+         if (stored[index] == 0 && temp->task->priority < lowPriority) {
+            lowPriority = temp->task->priority;
+            lowIndex = index;
             tmpFlag = 1;
-            if (temp->task->burst == 0) {
-               printf("Task %s finished.\n", temp->task->name);
-            }
          }
+         index++;
+         temp = temp->next;
+      }
+      stored[lowIndex] = 1;
+      temp = head;
+      for (i = 0; i < lowIndex; i++) {
          temp = temp->next;
       }
       if (!tmpFlag) {
          flag = 1;
+      } else {
+         run(temp->task, temp->task->burst);
       }
    }
-   while (temp != NULL) {
-      printf("[%s] [%d] [%d]\n",temp->task->name, temp->task->priority, temp->task->burst);
-      //run(temp->task, temp->task->burst);
-      temp = temp->next;
-   }   
 }
 
 void freeNodes(ListNode** cur) {
