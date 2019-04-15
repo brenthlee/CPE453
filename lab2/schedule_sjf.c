@@ -53,6 +53,7 @@ void schedule(ListNode* cur) {
          flag = 1;
       } else {
          run(temp->task, temp->task->burst);
+         printf("Task %s finished.\n", temp->task->name);
       }
    }
 }

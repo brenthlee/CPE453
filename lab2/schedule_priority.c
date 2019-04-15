@@ -19,7 +19,7 @@ void schedule(ListNode* cur) {
    int size = traverse(cur);
    int index, tmpFlag;
    int i;
-   int lowPriority, lowIndex;
+   int highPriority, highIndex;
    int stored[size];
    for (i = 0; i < size; i++) {
       stored[i] = 0;
@@ -33,26 +33,27 @@ void schedule(ListNode* cur) {
       temp = head;
       tmpFlag = 0;
       index = 0;
-      lowIndex = -1;
-      lowPriority = 50000;
+      highIndex = -1;
+      highPriority = -1;
       while (temp != NULL) {
-         if (stored[index] == 0 && temp->task->priority < lowPriority) {
-            lowPriority = temp->task->priority;
-            lowIndex = index;
+         if (stored[index] == 0 && temp->task->priority > highPriority) {
+            highPriority = temp->task->priority;
+            highIndex = index;
             tmpFlag = 1;
          }
          index++;
          temp = temp->next;
       }
-      stored[lowIndex] = 1;
+      stored[highIndex] = 1;
       temp = head;
-      for (i = 0; i < lowIndex; i++) {
+      for (i = 0; i < highIndex; i++) {
          temp = temp->next;
       }
       if (!tmpFlag) {
          flag = 1;
       } else {
          run(temp->task, temp->task->burst);
+         printf("Task %s finished.\n", temp->task->name);
       }
    }
 }

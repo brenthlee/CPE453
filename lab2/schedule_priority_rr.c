@@ -91,6 +91,7 @@ void schedule(ListNode* cur) {
          }
          //printf("no rr: %s", temp->task->name);
          run(temp->task, temp->task->burst);
+         printf("Task %s finished.\n", temp->task->name);
       }
    }
 }
