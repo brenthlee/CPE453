@@ -21,6 +21,7 @@ void schedule(ListNode* cur) {
    int flag = 0;
    head = cur;
    temp = head;
+   int slice;
    //int chunk = /traverse(head);
    while (!flag) {
       temp = head;
@@ -29,8 +30,9 @@ void schedule(ListNode* cur) {
          if (temp->task->burst > 0) {
             //TODO: How to choose the chunk time
             //run(temp->task, temp->task->burst);
-            run(temp->task, 10);
-            temp->task->burst -= 10;
+            slice = (temp->task->burst < 10) ? temp->task->burst : 10;
+            run(temp->task, slice);
+            temp->task->burst -= slice;
             tmpFlag = 1;
             if (temp->task->burst <= 0) {
                printf("Task %s finished.\n", temp->task->name);
