@@ -5,11 +5,12 @@
 #include "schedulers.h"
 #include "task.h"
 
-void add(char *name, int priority, int burst, ListNode** cur) {
+void add(char *name, int priority, int burst, ListNode** cur, int oldTid) {
    Task* task = (Task*)calloc(1,sizeof(Task));
    task->name = name;
    task->priority = priority;
    task->burst = burst;
+   task->tid = oldTid;
    addTail(cur, task);
 }
 
@@ -18,7 +19,7 @@ void schedule(ListNode* cur) {
    ListNode *temp, *head;
    int size = traverse(cur);
    int index, tmpFlag, slice;
-   int i, rcount = 0, lowPriority, lowIndex;
+   int i, rcount = 0, highPriority, highIndex;
    int stored[size];
    int rrflag, tmprrFlag;
    Task* rr[size];
@@ -36,24 +37,24 @@ void schedule(ListNode* cur) {
       tmpFlag = 0;
       index = 0;
       
-      lowIndex = -1;
-      lowPriority = 50000;
+      highIndex = -1;
+      highPriority = -1;
       while (temp != NULL) { //while this is not empty
-         if (stored[index] == 0 && temp->task->priority < lowPriority) {
-            lowPriority = temp->task->priority;
-            lowIndex = index;
+         if (stored[index] == 0 && temp->task->priority > highPriority) {
+            highPriority = temp->task->priority;
+            highIndex = index;
             tmpFlag = 1;
          }
          index++;
          temp = temp->next;
       }
-      stored[lowIndex] = 1;
+      stored[highIndex] = 1;
       temp = head;
       // already found location of lowest priority
       rcount = 0;
       for (i = 0; i < size; i++) { 
          // making list of equal priority tasks (rr)
-         if (temp->task->priority == lowPriority) {
+         if (temp->task->priority == highPriority) {
             rr[rcount] = temp->task;
             rcount++;
             stored[index] = 1;
@@ -85,7 +86,7 @@ void schedule(ListNode* cur) {
       } else {
          // if only one with this priority
          temp = head;
-         for (i = 0; i < lowIndex; i++) { 
+         for (i = 0; i < highIndex; i++) { 
          // making list of equal priority tasks (rr)
             temp = temp->next;
          }

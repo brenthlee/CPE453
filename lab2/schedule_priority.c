@@ -5,11 +5,12 @@
 #include "schedulers.h"
 #include "task.h"
 
-void add(char *name, int priority, int burst, ListNode** cur) {
+void add(char *name, int priority, int burst, ListNode** cur, int tidOld) {
    Task* task = (Task*)calloc(1,sizeof(Task));
    task->name = name;
    task->priority = priority;
    task->burst = burst;
+   task->burst = tidOld;
    addTail(cur, task);
 }
 
