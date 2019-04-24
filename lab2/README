@@ -1,3 +1,8 @@
+/*NAMES:
+ *BRENT LEE (blee96)
+ *KAITLIN BLEICH (kbleich)
+ */
+
 Completing this project will require writing the following C files:
 
 schedule_fcfs.c
@@ -13,3 +18,48 @@ For example, to build the FCFS scheduler, enter
 make fcfs
 
 which builds the fcfs executable file.
+
+TESTING:
+make fcfs
+./fcfs schedule.txt
+./fcfs book.txt
+make sjf
+./sjf schedule.txt
+./sjf book.txt
+make priority
+./priority schedule.txt
+./priority rr-schedule.txt
+./priority book.txt
+make rr
+./rr schedule.txt
+./rr rr-schedule.txt
+./rr book.txt
+make priority_rr
+./priority_rr schedule.txt
+./priority_rr rr-schedule.txt
+./priority_rr book.txt
+
+
+
+EXTRA CREDIT:
+ File used : book.txt
+ Avg. Turnaround Time: 
+   FCFS        : ((5 - 0) + (8 - 0) + (9 - 0) + (16 - 0) + (20 - 0)) / 5 = 11.6
+   SJF         : ((1 - 0) + (4 - 0) + (8 - 0) + (13 - 0) + (20 - 0)) / 5 = 9.2
+   Priority    : ((3 - 0) + (4 - 0) + (11 - 0) + (15 - 0) + (20 - 0)) / 5 =10.6
+   Round-Robin : (q = 10); ((5 - 0) + (8 - 0) + (9 - 0) + (16 - 0) + (20 - 0)) / 5 = 11.6
+   Priority-rr : (q = 10); ((3 - 0) + (4 - 0) + (11 - 0) + (15 - 0) + (20 - 0)) / 5 = 10.6 
+
+ Avg. Waiting Time:
+   FCFS        : (0 + 5 + 8 + 9 + 16) / 5 = 7.6
+   SJF         : (0 + 1 + 4 + 8 + 13) / 5 = 5.2
+   Priority    : (0 + 3 + 4 + 11 + 15)/ 5 = 6.6
+   Round-Robin : (q = 10); (0 + 5 + 8 + 9 + 16) / 5 = 7.6
+   Priority-rr : (q = 10); (0 + 3 + 4 + 11 + 15) / 5 = 6.6
+ 
+ Avg. Response Time:
+   FCFS        : (0 + 5 + 8 + 9 + 16) / 5 = 7.6
+   SJF         : (0 + 1 + 4 + 8 + 13) / 5 = 5.2
+   Priority    : (0 + 3 + 4 + 11 + 15)/ 5 = 6.6
+   Round-Robin : (q = 10); (0 + 5 + 8 + 9 + 16) / 5 = 7.6
+   Priority-rr : (q = 10); (0 + 3 + 4 + 11 + 15) / 5 = 6.6

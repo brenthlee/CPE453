@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     char *name;
     int priority;
     int burst;
-    int tid = 0;
+    int tid = 0; //EXTRA CREDIT
 
     if (!argv[1]) {
         fprintf(stderr, "No file given\n");
@@ -39,11 +39,8 @@ int main(int argc, char *argv[])
         name = strsep(&temp,",");
         priority = atoi(strsep(&temp,","));
         burst = atoi(strsep(&temp,","));
-
-        // add the task to the scheduler's list of tasks
         add(name,priority,burst,&cur, tid);
-        __sync_fetch_and_add(&tid, 1);
-        //free(temp);
+        __sync_fetch_and_add(&tid, 1); //EXTRA CREDIT
     }
     fclose(in);
 
