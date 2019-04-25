@@ -1,9 +1,9 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <time.h>
+#include "array.h"
 
 #define NUM_THREADS 2
-#define ARR_SIZE 10000
 
 void *sorter(void *params);
 void *merger(int *params);
@@ -49,7 +49,7 @@ int main() {
     clock_gettime(CLOCK_MONOTONIC, &finish);
     elapsed = (finish.tv_sec - start.tv_sec);
     elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
-    printf("elapsed time threaded: %f\n", elapsed);
+    printf("Time Elapsed running on Two Threads: %f\n", elapsed);
     i = tskList[0].start;
     j = tskList[1].start;
     k = 0;
@@ -67,7 +67,7 @@ int main() {
     while (j < tskList[1].end) {
         result[k++] = arr[j++];
     }
-    f = fopen("sorted.txt", "w");
+    f = fopen("sortedThread.txt", "w");
     fprintf(f, "%d", result[0]);
     for (i = 1; i < ARR_SIZE; i++) {
         if (i % 10 == 0) {

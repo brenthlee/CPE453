@@ -1,9 +1,9 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <time.h>
+#include "array.h"
 
 #define NUM_THREADS 2
-#define ARR_SIZE 10000
 
 void *sorter(void *params);
 void *merger(int *params);
@@ -38,8 +38,8 @@ int main() {
     clock_gettime(CLOCK_MONOTONIC, &finish);
     elapsed = (finish.tv_sec - start.tv_sec);
     elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
-    printf("time elapsed sequence: %f\n", elapsed);
-    f = fopen("sorted2.txt", "w");
+    printf("Time Elapsed running on a Single Thread: %f\n", elapsed);
+    f = fopen("sortedSequence.txt", "w");
     fprintf(f, "%d", arr[0]);
     for (i = 1; i < ARR_SIZE; i++) {
         if (i % 10 == 0) {

@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-
-#define ARR_SIZE 10000
+#include "array.h"
 
 void main(int argc, char *argv[]) {
     int seed;

@@ -4,13 +4,16 @@ SOURCES  = $(wildcard *.c)
 INCLUDES = $(wildcard *.h)
 OBJECTS  = $(SOURCES:.c=.o)
 
-all:$(TARGET)
+all: create sequence thread
 
-$(TARGET):$(OBJECTS)
-	gcc -o  $(TARGET) $(LDFLAGS) $(OBJECTS)
+create: create.c
+	gcc -o create create.c
 
-$(OBJECTS):$(SOURCES) $(INCLUDES)
-	gcc -c -g $(SOURCES)
+sequence: sortSequence.c
+	gcc -o sequence -pthread sortSequence.c
+
+thread: sortThread.c
+	gcc -o thread -pthread sortThread.c
 
 clean:
-	rm -f $(TARGET) $(OBJECTS)
+	rm -f create sequence thread *.txt
