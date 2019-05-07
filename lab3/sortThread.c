@@ -21,7 +21,7 @@ int result[ARR_SIZE];
 int main() {
     struct timespec start, finish;
     double elapsed;
-    int i, j, k;
+    int i, j, k, chunk;
     FILE *f;
     task tskList[NUM_THREADS];
     task *tsk;
@@ -32,11 +32,11 @@ int main() {
         fscanf(f," %d",&arr[i]);
     }
     close(f);
-
+    chunk = (ARR_SIZE / NUM_THREADS);
     for (i = 0; i < NUM_THREADS; i++) {
         tsk = &tskList[i];
-        tsk->start = i * (ARR_SIZE / 2);
-        tsk->end   = (i + 1) * (ARR_SIZE / 2);
+        tsk->start = i * chunk;
+        tsk->end   = (i + 1) * chunk;
     }
     clock_gettime(CLOCK_MONOTONIC, &start);
     for (i = 0; i < NUM_THREADS; i++) {

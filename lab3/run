@@ -1,0 +1,54 @@
+#!/bin/bash
+
+if [ $# -eq 1 ]; then
+   if [[ $1 == ?(-)+([0-9]) ]]; then
+      make clean
+      make
+      echo $1 | ./create
+      echo -e ""
+      ./sequence
+      ./thread
+   elif [ $1 = "-phil" ]; then
+      make clean
+      make
+      ./dinePhil
+   elif [ $1 = "-all" ]; then
+      echo "Error: Too few arguments with -all"
+      echo "Usage to run sorts: ./run [int seed]"
+      echo "Usage to run Dining Philosopher: ./run [-phil]"
+      echo "Usage to run all: ./run [-all] [int seed]"  
+   else
+      echo "Error: Invalid argument '$1'"
+      echo "Usage to run sorts: ./run [int seed]"
+      echo "Usage to run Dining Philosopher: ./run [-phil]"
+      echo "Usage to run all: ./run [-all] [int seed]"  
+   fi
+elif [ $# -eq 2 ]; then
+   if [ $1 = "-all" ]; then
+      if [[ $2 == ?(-)+([0-9]) ]]; then
+         make clean
+         make
+         echo "=======Sorting======="
+         echo $1 | ./create
+         echo ""
+         ./sequence
+         ./thread
+         echo -e "\n=======Dining Philosopher======="
+         ./dinePhil
+      else
+         echo "Error: Invalid argument '$2'"
+         echo "Usage to run sorts: ./run [int seed]"
+         echo "Usage to run Dining Philosopher: ./run [-phil]"
+         echo "Usage to run all: ./run [-all] [int seed]"
+      fi
+   else
+      echo "Error: Invalid argument '$1'"
+      echo "Usage to run sorts: ./run [int seed]"
+      echo "Usage to run Dining Philosopher: ./run [-phil]"
+      echo "Usage to run all: ./run [-all] [int seed]"  
+   fi
+else
+   echo "Usage to run sorts: ./run [int seed]"
+   echo "Usage to run Dining Philosopher: ./run [-phil]"
+   echo "Usage to run all: ./run [-all] [int seed]"  
+fi

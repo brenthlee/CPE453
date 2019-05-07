@@ -6,17 +6,27 @@ COLLABORATORS:
 TO MANUALLY REMOVE ALL .txt files:
     "make clean"
 
-TO RUN CODE:
-    "./execute.sh [int seed]" without the quotes or "./execute.sh" for usage
+FILES:
+    - array.h:          contains the number of elements in the array (#define ARR_SIZE n)
+    - create.c:         generates ARR_SIZE(from array.h) number of random elements into numbers.txt
+    - sortSequence.c:   sorts ARR_SIZE elements sequentially on a single thread
+    - sortThread.c:     sorts ARR_SIZE elements on two threads
+    - dinePhil.c:       runs through the dining philosophers problem
 
-./execute.sh will do the following in order:
+TO RUN CODE IN DIFFERENT WAYS:
+    - "./run" for usage
+    - "./run [int seed]" to run sorting algorithms
+    - "./run [-phil]" to run dining philosophers solution with threads
+    - "./run [-all] [int seed]" to run both sorting and extra credit
+
+./run will do the following in order:
     
     1) make clean               - It will get rid of all executables and previously tested files
     
     2) make                     - generate executables (create, sequence, thread)
     
-    3) echo seed | ./create     - puts in the seed that the user gave when doing "./execute.sh [int seed]"
-                                - generates 10,000 random ints
+    3) echo seed | ./create     - puts in the seed that the user gave when doing "./run [int seed]"
+                                - generates 10,000 random ints (because ARR_SIZE in array.h is 10,000)
                                 - puts random ints into a file named "numbers.txt"
     
     4) ./sequence               - uses numbers.txt generated from ./create to perform quicksort on a single thread
@@ -26,27 +36,35 @@ TO RUN CODE:
     5) ./thread                 - uses numbers.txt generated from ./create to perform quicksort on two separate threads
                                 - outputs a sorted list into a file names "sortedThread.txt"
                                 - prints out how long it took for quicksort on two threads
+    
+    6) ./dinePhil               - runs dining philosopher solution
 
 
 (Tried with 3,000 & 10,000 & 90,000 & 900,000 & 9,000,000 elements)
 TESTING:
-    ./execute.sh 5                              - to generate numbers.txt, sortedSequence.txt, and sortedThread.txt
+    ./run 5                                     - to generate numbers.txt, sortedSequence.txt, and sortedThread.txt
     vim numbers.txt                             - to see the original random numbers
     vim sortedSequence.txt                      - to see if the numbers from numbers.txt got sorted
-    diff sortedSequence.txt sortedThread.txt    - to see if the quicksort on two threads produced the same sorted order as the one from sequence
-    vim array.h                                 - changes the number of elements in the array to n=10,000 AND random number generation to 1 to n
+    diff sortedSequence.txt sortedThread.txt    - to see if the quicksort on two threads produced the
+                                                  same sorted order as the one from sequence
+    vim array.h                                 - changes the number of elements in the array
         change ARR_SIZE to whatever (10000)
-    ./execute.sh 6                              - check to see if new random numbers were generated
+    ./run 6                                     - check to see if new random numbers were generated
     vim numbers.txt                             - see original random numbers
     vim sortedThread.txt                        - see if numbers from numbers.txt got sorted
     diff sortedThread.txt sortedSequence.txt    - see if it produced the same results as the sortedThread.txt
     vim array.h (ARR_SIZE 3000)                 - etc. etc. etc.
-    ./execute.sh 3
+    ./run 3
     vim numbers.txt
     vim sortedThread.txt
     diff sortedThread.txt sortedSequence.txt
     make clean
+    ./run -dinePhil                             - check to see if any chopsticks are overlapping
+    ./run -dinePhil                             - check again to see a different order
+    ./run -all 4                                - last run through and check everything
 
 OBSERVATIONS:
     I noticed that the difference is very small because quicksort on a single thread is already pretty quick.
     The time difference varies of course, but the one on two threads is 99.999% likely to be faster than on one thread
+
+    The dining philosopher will have a different order everytime depending on the timing of the threads of the computer
