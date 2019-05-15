@@ -58,7 +58,7 @@ void firstFit(int* memory, int pid, char* size) {
    int start = 0;
    int startFlag = 0;
    int endFlag;
-   for(i = 0; i < MEM_SIZE; i++) { //should probably error check atoi...
+   for(i = 0; i < MEM_SIZE; i++) { 
       if(memory[i] == -1) {
          if(startFlag == 0) {
             start = i;
@@ -144,21 +144,6 @@ void compact(int* memory) {
          }
       }
    }
-   printIt(memory);
-//   for (i = 0; i < MEM_SIZE; i++) {
-//      if(memory[i] != -1) {
-//         processes[j] = memory[i];
-//      }
-//   }
-//
-//   for(i = 0; i < MEM_SIZE; i++) {
-//      memory[i] = processes[i];
-//   }
-//   for (i = 0; i < MEM_SIZE; i++) {
-//      if (memory[i] == process) {
-//         pSize++;
-//      }
-//   }
 }
 
 // begins report process
