@@ -111,20 +111,54 @@ void release(int* memory, int pid) {
    }
 }
 
+void printIt(int* memory) {
+   int i;
+   for(i = 0; i < MEM_SIZE; i++) {
+      printf("| %d |", memory[i]);
+   }
+   printf("\n");
+}
+
+void swap(int* a, int index1, int index2) {
+   int temp = a[index2];
+   a[index2] = a[index1];
+   a[index1] = temp;
+}
+
 // begins compaction process
 void compact(int* memory) {
    int i;
+   int j;
+   int pIndex = 0;
    int processes[MEM_SIZE];
+   int procIndex = 0;
    int process = -1;
    int pSize = 0;
-   for (i = 0; i < MEM_SIZE; i++) {
-      processes[i] = memory[i];
-   }
-   for (i = 0; i < MEM_SIZE; i++) {
-      if (memory[i] == process) {
-         pSize++;
+
+   for(i = 0; i < MEM_SIZE; i++) {
+      if(memory[i] == -1) {
+         for(j = i; j < MEM_SIZE; j++) {
+            if(memory[j] != -1) {
+               swap(memory, i++, j);
+            }
+         }
       }
    }
+   printIt(memory);
+//   for (i = 0; i < MEM_SIZE; i++) {
+//      if(memory[i] != -1) {
+//         processes[j] = memory[i];
+//      }
+//   }
+//
+//   for(i = 0; i < MEM_SIZE; i++) {
+//      memory[i] = processes[i];
+//   }
+//   for (i = 0; i < MEM_SIZE; i++) {
+//      if (memory[i] == process) {
+//         pSize++;
+//      }
+//   }
 }
 
 // begins report process
@@ -133,6 +167,7 @@ void report(int* memory){
    int start = 0;
    int sFlag = 0;
    int i;
+   printIt(memory);
    for (i = 0; i < MEM_SIZE; i++) {
       if (memory[i] != process) {
          if (sFlag == 0) {
@@ -192,7 +227,7 @@ void checkInput(char* input, int* memory) {
       process = strtok(NULL, " ");
       pid = atoi(&process[1]);
       release(memory, pid);
-   } else if(!strcmp("C", token)) {
+   } else if(!strcmp("C\n", token)) {
       compact(memory);
    } else if(!strcmp("STAT\n", token)) {
       report(memory);
