@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ $# -eq 1 ]; then
+      make clean
+      make
+      ./allocator $1
+      make clean
+else
+   echo "Usage: ./run <memory size>"
+fi

@@ -1,17 +1,8 @@
-//#include <stdlib.h>
-//#include <stdio.h>
-//#include <string.h>
-//
-//#define ARR_SIZE 1000
-//#define TRUE 1
-//#define FALSE 0
-//
-//typedef struct process {
-//   int start;
-//   int end;
-//   char* name;
-//} process;
-#include "allocate.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include "allocator.h"
+
 // first fit algorithm
 void firstFit(int* memory, char* process, char* size) {
    int i = 0;
@@ -30,7 +21,7 @@ void firstFit(int* memory, char* process, char* size) {
 
    for(i = 0; i < MEM_SIZE; i++) { //should probably error check atoi...
       printf("memory %d: memory loc: %d\n", i, memory[i]);
-      if(memory[i] == -1) {      // 
+      if(memory[i] == -1) {
          if(startFlag == 0) {
             start = i;
             startFlag = 1;
@@ -93,7 +84,7 @@ void checkInput(char* input, int* memory) {
    int length = strlen(input);
 
    token = strtok(input, " ");
-   printf("%s\n", token);
+   //printf("%s\n", token);
    if(!strcmp("RQ", token)) {
       process = strtok(NULL, " ");
       printf("%s\n", process);
@@ -107,16 +98,26 @@ void checkInput(char* input, int* memory) {
       compact(memory);
    } else if(!strcmp("STAT", token)) {
       report(memory);
+   } else {
+      printf("Invalid option. Options include:\n");
+      printf("\trequest: RQ P# #bytes Strategy(F,B,W)\n");
+      printf("\trelease: RL P#\n");
+      printf("\tcompact: C\n");
+      printf("\tsummary: STAT\n");
+      printf("\t   quit: quit\n\n");
    }
 }
 
 void main(int argc, char *argv[]) {
    int max;
-   int quit = FALSE;
+   int quit = 0;
    int i = 0;
    char input[100];
-   if(argc == 1) {
-      printf("Usage: ./allocator <memory size>\n");
+   if(argc < 2) {
+      printf("Error: Too few arguments.\nUsage: ./allocator <memory size>\n");
+      exit(1);
+   } else if (argc > 2) {
+      printf("Error: Too many arguments.\nUsage: ./allocator <memory size>\n");
       exit(1);
    }
    MEM_SIZE = atoi(argv[1]);
@@ -125,9 +126,7 @@ void main(int argc, char *argv[]) {
    for (i; i < MEM_SIZE; i++) {
       memory[i] = -1;
    }
-   printf("memory: %d\n", memory[0]);
-   
-   while(quit == FALSE) {
+   while(!quit) {
       printf("allocator> ");
       if(!fgets(input, 100, stdin)) {
          if (feof(stdin)) {
@@ -135,7 +134,7 @@ void main(int argc, char *argv[]) {
             break;
          }
       } else if(!strcmp(input, "quit\n")) {
-         quit = TRUE;
+         exit(-1);
       } else {
          checkInput(input, memory);
       }
