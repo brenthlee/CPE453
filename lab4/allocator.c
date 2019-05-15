@@ -40,12 +40,10 @@ void worstFit(int* memory, int pid, char* size) {
    if(currMax < pSize) {
       printf("Not enough space\n");
    } else {
-      //printf("Able to write ");
       for(j = start; j < pSize + start; j++) {
          memory[j] = pid;
       }
    }
-   //printf("filled: %d from start: %d\n", pSize, start);
 }
 
 // first fit algorithm
