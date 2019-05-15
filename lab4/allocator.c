@@ -3,12 +3,11 @@
 #include <string.h>
 #include "allocator.h"
 
-void worstFit(int* memory, char* process, char* size) {
+void worstFit(int* memory, int pid, char* size) {
    int i = 0;
    int j = 0;
    int prev = -1;
    int pSize = atoi(size);
-   int pid = atoi(&process[1]);
    // static (update occasionally)
    int currMax = 0;
    int maxStart = 0;
@@ -41,80 +40,135 @@ void worstFit(int* memory, char* process, char* size) {
    if(currMax < pSize) {
       printf("Not enough space\n");
    } else {
-      printf("Able to write ");
+      //printf("Able to write ");
       for(j = start; j < pSize + start; j++) {
          memory[j] = pid;
       }
    }
-   printf("filled: %d from start: %d\n", pSize, start);
+   //printf("filled: %d from start: %d\n", pSize, start);
 }
 
 // first fit algorithm
-void firstFit(int* memory, char* process, char* size) {
+void firstFit(int* memory, int pid, char* size) {
    int i = 0;
    int j = 0;
    int prev = -1;
    int pSize = atoi(size);
-   int pid = atoi(&process[1]);
-   printf("%d\n", pid);
-   // static (update occasionally)
    int count = 0;
    int start = 0;
    int startFlag = 0;
    int endFlag;
-
    for(i = 0; i < MEM_SIZE; i++) { //should probably error check atoi...
-      //printf("memory %d: memory loc: %d\n", i, memory[i]);
       if(memory[i] == -1) {
          if(startFlag == 0) {
             start = i;
             startFlag = 1;
          }
          count++;
-         //printf("count: %d, pSize: %d\n", count, pSize);
-         if(count == pSize) {
-            printf("  count when writing: %d, start: %d\n", count, start);
-            for(j = start; j < count + start; j++) {
-               memory[j] = pid;
-            }
+         if (count == pSize) {
             break;
          }
       } else {
+         startFlag = 0;
          count = 0;
       }
    }
 
    if(count < pSize) {
-      printf("Not enough space\n");
+      printf("Error: %d bytes available\n", count);
+      printf("       %d bytes requested\n", pSize);
+   } else {
+      for (i = start; i < (start+count); i++) {
+         memory[i] = pid;
+      }
    }
-   printf("available: %d, start: %d\n", count, start);
 }
 
 // begins request process
-void request(int* memory, char* process, char* size, char* type){
-   printf("make request: %s %s %s\n", process, size, type);
+void request(int* memory, int pid, char* size, char* type){
+   //printf("make request: %s %s %s\n", process, size, type);
    if(!strcmp(type, "F\n")) {
-      firstFit(memory, process, size);
+      firstFit(memory, pid, size);
    } else if (!strcmp(type, "W\n")) {
-      worstFit(memory, process, size);
+      worstFit(memory, pid, size);
    } else {
       printf("screw you\n");
    }
 }
 
 // begins release process
-void release(int* memory, char* input){
-   printf("release: %s\n", input);
+void release(int* memory, int pid) {
+   int i;
+   int changed = 0;
+   for (i = 0; i < MEM_SIZE; i++) {
+      if (memory[i] == pid) {
+         memory[i] = -1;
+         changed = 1;
+      }
+   }
+   if (!changed) {
+      printf("Error: Process P%d does not exist\n", pid);
+   }
 }
 
 // begins compaction process
-void compact(int* memory){
-   printf("compact\n");
+void compact(int* memory) {
+   int i;
+   int processes[MEM_SIZE];
+   int process = -1;
+   int pSize = 0;
+   for (i = 0; i < MEM_SIZE; i++) {
+      processes[i] = memory[i];
+   }
+   for (i = 0; i < MEM_SIZE; i++) {
+      if (memory[i] == process) {
+         pSize++;
+      }
+   }
 }
 
 // begins report process
 void report(int* memory){
-   printf("report\n");
+   int process = -1;
+   int start = 0;
+   int sFlag = 0;
+   int i;
+   for (i = 0; i < MEM_SIZE; i++) {
+      if (memory[i] != process) {
+         if (sFlag == 0) {
+            process = memory[i];
+         } else {
+            if (i == (MEM_SIZE - 1)) {
+               if (memory[i-1] == -1) {
+                  printf("Addresses [%d:%d] Unused\n",start,i-1);
+                  printf("Addresses [%d:%d] Process P%d\n",i,i,memory[i]);
+               } else {
+                  printf("Addresses [%d:%d] Process P%d\n",start,i-1,memory[i-1]);
+                  if (memory[i] == -1) {
+                     printf("Addresses [%d:%d] Unused\n",i,i);
+                  } else {
+                     printf("Addresses [%d:%d] Process P%d\n",i,i,memory[i]);
+                  }
+               }
+            } else {
+               if (memory[i-1] == -1) {
+                  printf("Addresses [%d:%d] Unused\n",start,i-1);
+               } else {
+                  printf("Addresses [%d:%d] Process P%d\n",start,i-1,process);
+               }
+               start = i;
+               process = memory[i];
+            }
+         }
+      } else if (i == (MEM_SIZE - 1)) {
+         if (memory[i] == -1) {
+            printf("Addresses [%d:%d] Unused\n",start,i);
+         } else {
+            printf("Addresses [%d:%d] Process P%d\n",start,i,memory[i]);
+         }
+      }
+      sFlag = 1;
+   }
 }
 
 void checkInput(char* input, int* memory) {
@@ -123,19 +177,21 @@ void checkInput(char* input, int* memory) {
    char* size;
    char* type;
    int i = 0;
+   int pid;
    int length = strlen(input);
 
    token = strtok(input, " ");
    //printf("%s\n", token);
    if(!strcmp("RQ", token)) {
       process = strtok(NULL, " ");
-      printf("%s\n", process);
       size = strtok(NULL, " ");
       type = strtok(NULL, " ");
-      request(memory, process, size, type);
+      pid = atoi(&process[1]);
+      request(memory, pid, size, type);
    } else if(!strcmp("RL", token)) {
       process = strtok(NULL, " ");
-      release(memory, process);
+      pid = atoi(&process[1]);
+      release(memory, pid);
    } else if(!strcmp("C", token)) {
       compact(memory);
    } else if(!strcmp("STAT\n", token)) {
@@ -146,14 +202,14 @@ void checkInput(char* input, int* memory) {
       printf("\trelease: RL P#\n");
       printf("\tcompact: C\n");
       printf("\tsummary: STAT\n");
-      printf("\t   quit: quit\n\n");
+      printf("\t   quit: X\n\n");
    }
 }
 
 void main(int argc, char *argv[]) {
    int max;
    int quit = 0;
-   int i = 0;
+   int i;
    char input[100];
    if(argc < 2) {
       printf("Error: Too few arguments.\nUsage: ./allocator <memory size>\n");
@@ -164,7 +220,7 @@ void main(int argc, char *argv[]) {
    }
    MEM_SIZE = atoi(argv[1]);
    int memory[MEM_SIZE];
-   for (i; i < MEM_SIZE; i++) {
+   for (i = 0; i < MEM_SIZE; i++) {
       memory[i] = -1;
    }
    while(!quit) {
@@ -174,7 +230,7 @@ void main(int argc, char *argv[]) {
             printf("exit\n");
             break;
          }
-      } else if(!strcmp(input, "quit\n")) {
+      } else if(!strcmp(input, "X\n")) {
          exit(-1);
       } else {
          checkInput(input, memory);

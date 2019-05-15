@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ $# -lt 1 ]; then
+   echo -e "Error: Too few arguments\nUsage: ./allocator <memory size>"
+elif [ $# -gt 1 ]; then
+   echo -e "Error: Too many arguments\nUsage: ./allocator <memory size>"
+else
+   make clean >/dev/null
+   make >/dev/null
+   ./a.out $1
+   make clean >/dev/null
+fi

@@ -1,4 +1,4 @@
-TARGET   = allocator
+TARGET   = a.out
 LDFLAGS  = -lm
 SOURCES  = $(wildcard *.c)
 INCLUDES = $(wildcard *.h)
