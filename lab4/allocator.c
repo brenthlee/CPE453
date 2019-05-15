@@ -3,6 +3,52 @@
 #include <string.h>
 #include "allocator.h"
 
+void worstFit(int* memory, char* process, char* size) {
+   int i = 0;
+   int j = 0;
+   int prev = -1;
+   int pSize = atoi(size);
+   int pid = atoi(&process[1]);
+   // static (update occasionally)
+   int currMax = 0;
+   int maxStart = 0;
+   int count = 0;
+   int start = 0;
+   int startFlag = 0;
+   int endFlag;
+
+   for(i = 0; i < MEM_SIZE; i++) { 
+      //printf("memory %d: memory loc: %d\n", i, memory[i]);
+      if(memory[i] == -1) {
+         if(startFlag == 0) {  
+            start = i;
+            startFlag = 1;
+         }
+         count++;
+         //printf("count: %d, pSize: %d\n", count, pSize);
+         if(count > currMax) {
+            currMax=count;
+            maxStart = start;
+            //printf("currMax: %d, maxStart: %d\n", currMax, maxStart);
+         }
+      } else {
+         count = 0;
+         startFlag = 0; //wait for empty space
+         currMax = 0;
+      }
+   }
+
+   if(currMax < pSize) {
+      printf("Not enough space\n");
+   } else {
+      printf("Able to write ");
+      for(j = start; j < pSize + start; j++) {
+         memory[j] = pid;
+      }
+   }
+   printf("filled: %d from start: %d\n", pSize, start);
+}
+
 // first fit algorithm
 void firstFit(int* memory, char* process, char* size) {
    int i = 0;
@@ -16,21 +62,19 @@ void firstFit(int* memory, char* process, char* size) {
    int start = 0;
    int startFlag = 0;
    int endFlag;
-   // dynamic
-   int currSize;
 
    for(i = 0; i < MEM_SIZE; i++) { //should probably error check atoi...
-      printf("memory %d: memory loc: %d\n", i, memory[i]);
+      //printf("memory %d: memory loc: %d\n", i, memory[i]);
       if(memory[i] == -1) {
          if(startFlag == 0) {
             start = i;
             startFlag = 1;
          }
          count++;
-         printf("count: %d, pSize: %d\n", count, pSize);
+         //printf("count: %d, pSize: %d\n", count, pSize);
          if(count == pSize) {
-            printf("count when writing: %d, start: %d\n", count, start);
-            for(j = start; j < count; j++) {
+            printf("  count when writing: %d, start: %d\n", count, start);
+            for(j = start; j < count + start; j++) {
                memory[j] = pid;
             }
             break;
@@ -40,6 +84,9 @@ void firstFit(int* memory, char* process, char* size) {
       }
    }
 
+   if(count < pSize) {
+      printf("Not enough space\n");
+   }
    printf("available: %d, start: %d\n", count, start);
 }
 
@@ -48,6 +95,8 @@ void request(int* memory, char* process, char* size, char* type){
    printf("make request: %s %s %s\n", process, size, type);
    if(!strcmp(type, "F\n")) {
       firstFit(memory, process, size);
+   } else if (!strcmp(type, "W\n")) {
+      worstFit(memory, process, size);
    } else {
       printf("screw you\n");
    }
@@ -66,13 +115,6 @@ void compact(int* memory){
 // begins report process
 void report(int* memory){
    printf("report\n");
-}
-
-void initialize(int* memory, int size) {
-   int i = 0;
-   for (i; i < size; i++) {
-      memory[i] = -1;
-   }
 }
 
 void checkInput(char* input, int* memory) {
@@ -96,7 +138,7 @@ void checkInput(char* input, int* memory) {
       release(memory, process);
    } else if(!strcmp("C", token)) {
       compact(memory);
-   } else if(!strcmp("STAT", token)) {
+   } else if(!strcmp("STAT\n", token)) {
       report(memory);
    } else {
       printf("Invalid option. Options include:\n");
@@ -122,7 +164,6 @@ void main(int argc, char *argv[]) {
    }
    MEM_SIZE = atoi(argv[1]);
    int memory[MEM_SIZE];
-   initialize(memory, max);
    for (i; i < MEM_SIZE; i++) {
       memory[i] = -1;
    }
