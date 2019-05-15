@@ -15,54 +15,41 @@
 // first fit algorithm
 void firstFit(int* memory, char* process, char* size) {
    int i = 0;
+   int j = 0;
    int prev = -1;
    int pSize = atoi(size);
+   int pid = atoi(&process[1]);
+   printf("%d\n", pid);
    // static (update occasionally)
-   int availSize = 0;
-   int index = 0;
+   int count = 0;
+   int start = 0;
+   int startFlag = 0;
+   int endFlag;
    // dynamic
    int currSize;
 
    for(i = 0; i < MEM_SIZE; i++) { //should probably error check atoi...
-      if(memory[i] == -1) {
-         if(flag == 0) {
+      printf("memory %d: memory loc: %d\n", i, memory[i]);
+      if(memory[i] == -1) {      // 
+         if(startFlag == 0) {
             start = i;
+            startFlag = 1;
          }
          count++;
+         printf("count: %d, pSize: %d\n", count, pSize);
          if(count == pSize) {
-            // do stuff
+            printf("count when writing: %d, start: %d\n", count, start);
+            for(j = start; j < count; j++) {
+               memory[j] = pid;
+            }
+            break;
          }
-
+      } else {
+         count = 0;
       }
-////        if(memory[i] != -1 || (MEM_SIZE -1) == i) {               // if curr is not free
-////           if(prev == -1) {                 // if previous WAS free
-////              if(currSize >= atoi(size)) {  // if P will fit
-////                 availSize = currSize;
-////                 currSize = 0;
-////              }
-////           }
-////        } else {
-////           currSize++;
-////           if(prev != -1) {
-////              index = i;
-////           }
-////        }
-////        prev = memory[i];
-//      if(prev == -1 && memory[i] != -1) { //if previous was free
-//         index = i;
-//      } 
-//      if(memory[i] == -1) {
-//         currSize++;
-//      } else if (prev != -1 && memory[i] == -1){
-//         // check if process will fit in current block
-//         if(currSize >= atoi(size)) {
-//            // update available size
-//            availSize = currSize;
-//         }
-//      }
-//      prev = memory[i];
    }
-   printf("available: %d, start: %d\n", availSize, index);
+
+   printf("available: %d, start: %d\n", count, start);
 }
 
 // begins request process
@@ -126,6 +113,7 @@ void checkInput(char* input, int* memory) {
 void main(int argc, char *argv[]) {
    int max;
    int quit = FALSE;
+   int i = 0;
    char input[100];
    if(argc == 1) {
       printf("Usage: ./allocator <memory size>\n");
@@ -134,6 +122,10 @@ void main(int argc, char *argv[]) {
    MEM_SIZE = atoi(argv[1]);
    int memory[MEM_SIZE];
    initialize(memory, max);
+   for (i; i < MEM_SIZE; i++) {
+      memory[i] = -1;
+   }
+   printf("memory: %d\n", memory[0]);
    
    while(quit == FALSE) {
       printf("allocator> ");
