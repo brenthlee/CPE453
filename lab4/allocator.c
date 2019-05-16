@@ -1,48 +1,128 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 #include "allocator.h"
 
 void worstFit(int* memory, int pid, char* size) {
    int i = 0;
-   int j = 0;
-   int prev = -1;
    int pSize = atoi(size);
-   // static (update occasionally)
    int currMax = 0;
-   int maxStart = 0;
    int count = 0;
    int start = 0;
-   int startFlag = 0;
-   int endFlag;
-
-   for(i = 0; i < MEM_SIZE; i++) { 
-      //printf("memory %d: memory loc: %d\n", i, memory[i]);
-      if(memory[i] == -1) {
-         if(startFlag == 0) {  
-            start = i;
-            startFlag = 1;
-         }
+   for(i = 0; i < MEM_SIZE; i++) {
+      if (memory[i] == -1) {
          count++;
-         //printf("count: %d, pSize: %d\n", count, pSize);
-         if(count > currMax) {
-            currMax=count;
-            maxStart = start;
-            //printf("currMax: %d, maxStart: %d\n", currMax, maxStart);
+         if (i == MEM_SIZE - 1) {
+            if (count > currMax) {
+               currMax = count;
+               start = i-count+1;
+            }
          }
       } else {
+         if (count > currMax) {
+            currMax = count;
+            start = i-count;
+         }
          count = 0;
-         startFlag = 0; //wait for empty space
-         currMax = 0;
       }
    }
-
    if(currMax < pSize) {
-      printf("Not enough space\n");
+      printf("Error: %d contiguous bytes available\n", count);
+      printf("       %d bytes requested\n", pSize);
    } else {
-      for(j = start; j < pSize + start; j++) {
-         memory[j] = pid;
+      for(i = start; i < pSize + start; i++) {
+         memory[i] = pid;
       }
+   }
+}
+
+void quickSort(int arr[], int low, int high, int starts[]) {
+   int i,j,pivot,tmp,tmp2;
+   if (low < high) {
+      pivot = low;
+      i = low;
+      j = high;
+      while (i < j) {
+         while (arr[i] <= arr[pivot] && i < high) {
+            i++;
+         }
+         while (arr[j] > arr[pivot]) {
+            j--;
+         }
+         if (i < j) {
+            tmp = arr[i];
+            tmp2 = starts[i];
+            arr[i] = arr[j];
+            starts[i] = starts[j];
+            arr[j] = tmp;
+            starts[j] = tmp2;
+         }
+      }
+      tmp = arr[pivot];
+      tmp2 = starts[pivot];
+      arr[pivot] = arr[j];
+      starts[pivot] = starts[j];
+      arr[j] = tmp;
+      starts[j] = tmp2;
+      quickSort(arr,low,j-1,starts);
+      quickSort(arr,j+1,high,starts);
+   }
+}
+
+void bestFit(int* memory, int pid, char* size) {
+   int i = 0;
+   int pSize = atoi(size);
+   int currMin = INT_MAX;
+   int b;
+   int firstZFlag = 0;
+   int firstNFlag = 0;
+   int count = 0;
+   int start = 0;
+   int mins[MEM_SIZE];
+   int starts[MEM_SIZE];
+   int minIndex = 0;
+   int flag = 0;
+   for(i = 0; i < MEM_SIZE; i++) {
+      if (memory[i] == -1) {
+         if (firstZFlag == 0) {
+            firstZFlag = 1;
+            starts[minIndex] = i;
+         }
+         firstNFlag = 0;
+         count++;
+         if (i == MEM_SIZE-1) {
+            mins[minIndex] = count;
+            minIndex++;
+            if (count < currMin) {
+               currMin = count;
+            }
+         }
+      } else {
+         if (firstNFlag == 0) {
+            mins[minIndex] = count;
+            minIndex++;
+            if (count < currMin) {
+               currMin = count;
+            }
+         }
+         firstZFlag = 0;
+         count = 0;
+      }
+   }
+   quickSort(mins, 0, minIndex, starts);
+   for (i = 0; i < minIndex+1; i++) {
+      if (mins[i] >= pSize) {
+         for (b = starts[i]; b < (starts[i] + pSize); b++) {
+            memory[b] = pid;
+         }
+         flag = 1;
+         break;
+      }
+   }
+   if(!flag) {
+      printf("Error: %d contiguous bytes available\n", count);
+      printf("       %d bytes requested\n", pSize);
    }
 }
 
@@ -56,7 +136,7 @@ void firstFit(int* memory, int pid, char* size) {
    int start = 0;
    int startFlag = 0;
    int endFlag;
-   for(i = 0; i < MEM_SIZE; i++) { 
+   for(i = 0; i < MEM_SIZE; i++) {
       if(memory[i] == -1) {
          if(startFlag == 0) {
             start = i;
@@ -73,7 +153,7 @@ void firstFit(int* memory, int pid, char* size) {
    }
 
    if(count < pSize) {
-      printf("Error: %d bytes available\n", count);
+      printf("Error: %d contiguous bytes available\n", count);
       printf("       %d bytes requested\n", pSize);
    } else {
       for (i = start; i < (start+count); i++) {
@@ -89,8 +169,13 @@ void request(int* memory, int pid, char* size, char* type){
       firstFit(memory, pid, size);
    } else if (!strcmp(type, "W\n")) {
       worstFit(memory, pid, size);
+   } else if (!strcmp(type, "B\n")) {
+      bestFit(memory, pid, size);
    } else {
-      printf("screw you\n");
+      printf("Error: Invalid argument\nOptions include:\n");
+      printf("       F - first fit\n");
+      printf("       W - worst fit\n");
+      printf("       B - best fit\n");
    }
 }
 
@@ -109,30 +194,18 @@ void release(int* memory, int pid) {
    }
 }
 
-void printIt(int* memory) {
-   int i;
-   for(i = 0; i < MEM_SIZE; i++) {
-      printf("| %d |", memory[i]);
-   }
-   printf("\n");
-}
-
 void swap(int* a, int index1, int index2) {
    int temp = a[index2];
    a[index2] = a[index1];
    a[index1] = temp;
 }
 
+//TODO TODO TODO
 // begins compaction process
+// SUPER SUPER SLOW FOR LARGE NUMBERS ABOVE 100000
 void compact(int* memory) {
    int i;
    int j;
-   int pIndex = 0;
-   int processes[MEM_SIZE];
-   int procIndex = 0;
-   int process = -1;
-   int pSize = 0;
-
    for(i = 0; i < MEM_SIZE; i++) {
       if(memory[i] == -1) {
          for(j = i; j < MEM_SIZE; j++) {
@@ -150,7 +223,8 @@ void report(int* memory){
    int start = 0;
    int sFlag = 0;
    int i;
-   printIt(memory);
+   printf("\n");
+   //printIt(memory);
    for (i = 0; i < MEM_SIZE; i++) {
       if (memory[i] != process) {
          if (sFlag == 0) {
