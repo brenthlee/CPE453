@@ -1,5 +1,4 @@
 #!/bin/bash
-
 if [ $# -lt 1 ]; then
    echo -e "Error: Too few arguments\nUsage: ./allocator <memory size>"
 elif [ $# -gt 1 ]; then

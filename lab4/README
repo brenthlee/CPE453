@@ -1,0 +1,20 @@
+Collaborators:
+   Brent Lee (blee96)
+   Kaitlin Bleich (kbleich)
+
+To run a sample test:
+   ./allocator 9999999 < test.in
+
+To run individual test/manually:
+   make clean
+   make
+   ./a.out memSize
+
+
+Struggles:
+   Before Pantoja stated that we should use linked list, we already started with an array implementation
+   We got everything to work, but then realized that the max memSize that can be allocated is MAX_INT/sizeof(int), so it would only work with 1/4 of the real maximum
+
+   Changing it to a linked list implementation made some stuff easier, but also some stuff was more complicated
+   
+   There were A LOT of edge cases, and might have still missed some

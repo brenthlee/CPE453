@@ -1,293 +1,363 @@
-#include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
 #include <limits.h>
-#include "allocator.h"
+#include <string.h>
 
-void worstFit(int* memory, int pid, char* size) {
+typedef struct Process {
+   int start;
+   int end;
+   int isHole;
+   char* name;
+   struct Process *next;
+} Process;
+
+void worstFit(Process** head, char* process, int pSize) {
+   Process* cur = *head;
+   Process* prev = NULL;
+   int space = 0;
    int i = 0;
-   int pSize = atoi(size);
-   int currMax = 0;
-   int count = 0;
-   int start = 0;
-   for(i = 0; i < MEM_SIZE; i++) {
-      if (memory[i] == -1) {
-         count++;
-         if (i == MEM_SIZE - 1) {
-            if (count > currMax) {
-               currMax = count;
-               start = i-count+1;
+   int mIndex;
+   while (cur != NULL) {
+      if (cur->isHole == 1 && ((cur->end - cur->start + 1) > space)) {
+         space = cur->end - cur->start + 1;
+         mIndex = i;
+      }
+      i++;
+      prev = cur;
+      cur = cur->next;
+   }
+   if (space >= pSize) {
+      cur = *head;
+      for (i = 0; i < mIndex; i++) {
+         prev = cur;
+         cur = cur->next;
+      }
+      
+      Process* newProcess = (Process*)malloc(sizeof(Process));
+      newProcess->name = (char*)malloc(sizeof(char)*20);
+      strcpy(newProcess->name, process);
+      newProcess->start = cur->start;
+      newProcess->end = newProcess->start + pSize - 1;
+      newProcess->isHole = 0;
+      if (cur->start == 0) {
+         if (cur->next != NULL) {
+            cur->start = newProcess->end + 1;
+            newProcess->next = cur;
+            (*head) = newProcess;
+            if (cur->start > cur->end) {
+               newProcess->next = cur->next;
+               free(cur);
+            }
+         } else {
+            cur->start = newProcess->end + 1;
+            newProcess->next = cur;
+            (*head) = newProcess;
+            if (cur->start > cur->end) {
+               newProcess->next = NULL;
+               free(cur);
             }
          }
       } else {
-         if (count > currMax) {
-            currMax = count;
-            start = i-count;
+         if (cur->next != NULL) {
+            cur->start = newProcess->end + 1;
+            prev->next = newProcess;
+            newProcess->next = cur;
+            if (cur->start > cur->end) {
+               newProcess->next = cur->next;
+               free(cur);
+            }
+         } else {
+            cur->start = newProcess->end + 1;
+            prev->next = newProcess;
+            newProcess->next = cur;
+            if (cur->start > cur->end) {
+               newProcess->next = NULL;
+               free(cur);
+            }
          }
-         count = 0;
       }
+   } else {
+      printf("Error: %d contiguous bytes available\n", space);
+      printf("       %d bytes requested\n", pSize);
    }
-   if(currMax < pSize) {
-      printf("Error: %d contiguous bytes available\n", count);
+}
+
+void bestFit(Process** head, char* process, int pSize) {
+   Process* cur = *head;
+   Process* prev = NULL;
+   int space = -1;
+   int mIndex = -1;
+   int maxSpace = 0;
+   int i;
+   int tmpSize = -1;
+   while (cur != NULL) {
+      if (cur->isHole) {
+         tmpSize = cur->end - cur->start + 1;
+         if (tmpSize > maxSpace) {
+            maxSpace = tmpSize;
+         }
+         if (space < 0 && tmpSize >= pSize) {
+            space = tmpSize;
+            mIndex = i;
+         } else if (tmpSize < space && tmpSize >= pSize) {
+            space = tmpSize;
+            mIndex = i;
+         }
+      }
+      i++;
+      cur = cur->next;
+   }
+   if (mIndex == -1) {
+      printf("Error: %d contiguous bytes available\n", maxSpace);
       printf("       %d bytes requested\n", pSize);
    } else {
-      for(i = start; i < pSize + start; i++) {
-         memory[i] = pid;
+      cur = *head;
+      for (i = 0; i < mIndex; i++) {
+         prev = cur;
+         cur = cur->next;
       }
-   }
-}
-
-void quickSort(int arr[], int low, int high, int starts[]) {
-   int i,j,pivot,tmp,tmp2;
-   if (low < high) {
-      pivot = low;
-      i = low;
-      j = high;
-      while (i < j) {
-         while (arr[i] <= arr[pivot] && i < high) {
-            i++;
-         }
-         while (arr[j] > arr[pivot]) {
-            j--;
-         }
-         if (i < j) {
-            tmp = arr[i];
-            tmp2 = starts[i];
-            arr[i] = arr[j];
-            starts[i] = starts[j];
-            arr[j] = tmp;
-            starts[j] = tmp2;
-         }
-      }
-      tmp = arr[pivot];
-      tmp2 = starts[pivot];
-      arr[pivot] = arr[j];
-      starts[pivot] = starts[j];
-      arr[j] = tmp;
-      starts[j] = tmp2;
-      quickSort(arr,low,j-1,starts);
-      quickSort(arr,j+1,high,starts);
-   }
-}
-
-void bestFit(int* memory, int pid, char* size) {
-   int i = 0;
-   int pSize = atoi(size);
-   int currMin = INT_MAX;
-   int b;
-   int firstZFlag = 0;
-   int firstNFlag = 0;
-   int count = 0;
-   int start = 0;
-   int mins[MEM_SIZE];
-   int starts[MEM_SIZE];
-   int minIndex = 0;
-   int flag = 0;
-   for(i = 0; i < MEM_SIZE; i++) {
-      if (memory[i] == -1) {
-         if (firstZFlag == 0) {
-            firstZFlag = 1;
-            starts[minIndex] = i;
-         }
-         firstNFlag = 0;
-         count++;
-         if (i == MEM_SIZE-1) {
-            mins[minIndex] = count;
-            minIndex++;
-            if (count < currMin) {
-               currMin = count;
+      Process* newProcess = (Process*)malloc(sizeof(Process));
+      newProcess->name = (char*)malloc(sizeof(char)*20);
+      strcpy(newProcess->name, process);
+      newProcess->start = cur->start;
+      newProcess->end = newProcess->start + pSize - 1;
+      newProcess->isHole = 0;
+      newProcess->next = cur;
+      if (cur->start == 0) {
+         if (cur->next != NULL) {
+            cur->start = newProcess->end + 1;
+            (*head) = newProcess;
+            if (cur->start > cur->end) {
+               newProcess->next = cur->next;
+               free(cur);
+            }
+         } else {
+            cur->start = newProcess->end + 1;
+            (*head) = newProcess;
+            if (cur->start > cur->end) {
+               newProcess->next = NULL;
+               free(cur);
             }
          }
       } else {
-         if (firstNFlag == 0) {
-            mins[minIndex] = count;
-            minIndex++;
-            if (count < currMin) {
-               currMin = count;
+         if (cur->next != NULL) {
+            cur->start = newProcess->end + 1;
+            prev->next = newProcess;
+            if (cur->start > cur->end) {
+               newProcess->next = cur->next;
+               free(cur);
+            }
+         } else {
+            cur->start = newProcess->end + 1;
+            prev->next = newProcess;
+            if (cur->start > cur->end) {
+               newProcess->next = NULL;
+               free(cur);
             }
          }
-         firstZFlag = 0;
-         count = 0;
       }
    }
-   quickSort(mins, 0, minIndex, starts);
-   for (i = 0; i < minIndex+1; i++) {
-      if (mins[i] >= pSize) {
-         for (b = starts[i]; b < (starts[i] + pSize); b++) {
-            memory[b] = pid;
+}
+
+void release(Process** head, char* process) {
+   Process* cur = *head;
+   Process* prev = NULL;
+   int flag = 0;
+   while (cur != NULL) {
+      if (!strcmp(cur->name, process)) {
+         flag = 1;
+         cur->name = "Unused";
+         cur->isHole = 1;
+         if (cur->next != NULL && cur->next->isHole) {
+            cur->next->start = cur->start;
+            if (prev == NULL) {
+               (*head) = cur->next;
+            } else {
+               prev->next = cur->next;
+            }
+            if (!(prev != NULL && prev->isHole)) {
+               free(cur);
+            } else {
+               cur = cur->next;
+            }
          }
+         if (prev != NULL && prev->isHole) {
+            prev->end = cur->end;
+            if (cur->next == NULL) {
+               prev->next = NULL;
+            } else {
+               prev->next = cur->next;
+            }
+            free(cur);
+         }
+      }
+      prev = cur;
+      cur = cur->next;
+   }
+   if (!flag) {
+      printf("Error: %s has not been allocated\n", process);
+   }
+}
+
+void compact(Process** head) {
+   int count = 0;
+   Process* cur = *head;
+   Process* prev = NULL;
+   while (cur != NULL) {
+      if (cur->isHole) {
+         if (prev == NULL) {
+            if (cur->next == NULL) {
+            } else {
+               count = count + (cur->end - cur->start + 1);
+               cur->next->start = cur->next->start - count;
+               cur->next->end = cur->next->end - count;
+               (*head) = cur->next;
+            }
+         } else {
+            if (cur->next == NULL) {
+            } else {
+               count = count + (cur->end - cur->start + 1);
+               cur->next->start = cur->next->start - count;
+               cur->next->end = cur->next->end - count;
+               prev->next = cur->next;
+            }
+         }
+      } else {
+         if (prev != NULL && (!(prev->isHole))) {
+            cur->start = cur->start - count;
+            cur->end = cur->end - count;
+         }
+      }
+      prev = cur;
+      cur = cur->next;
+   }
+   if (prev != NULL) {
+      if (prev->isHole) {
+         prev->start = prev->start - count;
+      } else {
+         Process* newProcess = (Process*)malloc(sizeof(Process));
+         newProcess->name = (char*)malloc(sizeof(char)*20);
+         newProcess->name = "Unused";
+         newProcess->start = prev->end+1;
+         newProcess->end = newProcess->start+count-1;
+         newProcess->isHole = 1;
+         newProcess->next = NULL;
+         prev->next = newProcess;
+      }
+   }
+}
+
+void report(Process* head) {
+   Process* cur = head;
+   while (cur != NULL) {
+      if (!strcmp("Unused", cur->name)) {
+         printf("Addresses [%d:%d] %s\n",cur->start,cur->end,cur->name);
+      } else {
+         printf("Addresses [%d:%d] Process %s\n",cur->start,cur->end,cur->name);
+      }
+      cur = cur->next;
+   }
+}
+
+void firstFit(Process** head, char* process, int pSize) {
+   Process* cur = *head;
+   Process* prev = NULL;
+   int space = 0;
+   int flag = 0;
+   while (cur != NULL) {
+      if (cur->isHole == 1) {
+         space = cur->end - cur->start + 1;
+         if (space >= pSize) {
+            flag = 1;
+            break;
+         }
+      }
+      prev = cur;
+      cur = cur->next;
+   }
+   if (flag) {
+      Process* newProcess = (Process*)malloc(sizeof(Process));
+      newProcess->name = (char*)malloc(sizeof(char)*20);
+      strcpy(newProcess->name, process);
+      newProcess->start = cur->start;
+      newProcess->end = newProcess->start + pSize - 1;
+      newProcess->isHole = 0;
+      newProcess->next = NULL;
+      if (cur->start == 0) {
+         cur->start = newProcess->end+1;
+         newProcess->next = (*head);
+         (*head) = newProcess;
+         if (cur->start > cur->end) {
+            newProcess->next = NULL;
+            free(cur);
+         }
+      } else {
+         cur->start = newProcess->end+1;
+         newProcess->next = cur;
+         prev->next = newProcess;
+         if (cur->start > cur->end) {
+            if (cur->next != NULL) {
+               newProcess->next = cur->next;
+            } else {
+               newProcess->next = NULL;
+            }
+            free(cur);
+         }
+      }
+   } else {
+      printf("Error: %d contiguous bytes available\n", space);
+      printf("       %d bytes requested\n", pSize);
+   }
+}
+
+void request(Process** head, char* process, int pSize, char* type) {
+   int flag = 0;
+   Process* cur = *head;
+   while (cur != NULL) {
+      if (!strcmp(process, cur->name)) {
+         printf("Error: Process already allocated\n");
          flag = 1;
          break;
       }
+      cur = cur->next;
    }
-   if(!flag) {
-      printf("Error: %d contiguous bytes available\n", count);
-      printf("       %d bytes requested\n", pSize);
-   }
-}
-
-// first fit algorithm
-void firstFit(int* memory, int pid, char* size) {
-   int i = 0;
-   int j = 0;
-   int prev = -1;
-   int pSize = atoi(size);
-   int count = 0;
-   int start = 0;
-   int startFlag = 0;
-   int endFlag;
-   for(i = 0; i < MEM_SIZE; i++) {
-      if(memory[i] == -1) {
-         if(startFlag == 0) {
-            start = i;
-            startFlag = 1;
-         }
-         count++;
-         if (count == pSize) {
-            break;
-         }
+   if (!flag) {
+      if (!strcmp(type, "F\n")) {
+         firstFit(head, process, pSize);
+      } else if (!strcmp(type, "W\n")) {
+         worstFit(head, process, pSize);
+      } else if (!strcmp(type, "B\n")) {
+         bestFit(head, process, pSize);
       } else {
-         startFlag = 0;
-         count = 0;
-      }
-   }
-
-   if(count < pSize) {
-      printf("Error: %d contiguous bytes available\n", count);
-      printf("       %d bytes requested\n", pSize);
-   } else {
-      for (i = start; i < (start+count); i++) {
-         memory[i] = pid;
+         printf("Error: Invalid arument\nOptions include:\n");
+         printf("       F - first fit\n");
+         printf("       W - worst fit\n");
+         printf("       B - best fit\n");
       }
    }
 }
 
-// begins request process
-void request(int* memory, int pid, char* size, char* type){
-   //printf("make request: %s %s %s\n", process, size, type);
-   if(!strcmp(type, "F\n")) {
-      firstFit(memory, pid, size);
-   } else if (!strcmp(type, "W\n")) {
-      worstFit(memory, pid, size);
-   } else if (!strcmp(type, "B\n")) {
-      bestFit(memory, pid, size);
-   } else {
-      printf("Error: Invalid argument\nOptions include:\n");
-      printf("       F - first fit\n");
-      printf("       W - worst fit\n");
-      printf("       B - best fit\n");
-   }
-}
-
-// begins release process
-void release(int* memory, int pid) {
-   int i;
-   int changed = 0;
-   for (i = 0; i < MEM_SIZE; i++) {
-      if (memory[i] == pid) {
-         memory[i] = -1;
-         changed = 1;
-      }
-   }
-   if (!changed) {
-      printf("Error: Process P%d does not exist\n", pid);
-   }
-}
-
-void swap(int* a, int index1, int index2) {
-   int temp = a[index2];
-   a[index2] = a[index1];
-   a[index1] = temp;
-}
-
-//TODO TODO TODO
-// begins compaction process
-// SUPER SUPER SLOW FOR LARGE NUMBERS ABOVE 100000
-void compact(int* memory) {
-   int i;
-   int j;
-   for(i = 0; i < MEM_SIZE; i++) {
-      if(memory[i] == -1) {
-         for(j = i; j < MEM_SIZE; j++) {
-            if(memory[j] != -1) {
-               swap(memory, i++, j);
-            }
-         }
-      }
-   }
-}
-
-// begins report process
-void report(int* memory){
-   int process = -1;
-   int start = 0;
-   int sFlag = 0;
-   int i;
-   printf("\n");
-   //printIt(memory);
-   for (i = 0; i < MEM_SIZE; i++) {
-      if (memory[i] != process) {
-         if (sFlag == 0) {
-            process = memory[i];
-         } else {
-            if (i == (MEM_SIZE - 1)) {
-               if (memory[i-1] == -1) {
-                  printf("Addresses [%d:%d] Unused\n",start,i-1);
-                  printf("Addresses [%d:%d] Process P%d\n",i,i,memory[i]);
-               } else {
-                  printf("Addresses [%d:%d] Process P%d\n",start,i-1,memory[i-1]);
-                  if (memory[i] == -1) {
-                     printf("Addresses [%d:%d] Unused\n",i,i);
-                  } else {
-                     printf("Addresses [%d:%d] Process P%d\n",i,i,memory[i]);
-                  }
-               }
-            } else {
-               if (memory[i-1] == -1) {
-                  printf("Addresses [%d:%d] Unused\n",start,i-1);
-               } else {
-                  printf("Addresses [%d:%d] Process P%d\n",start,i-1,process);
-               }
-               start = i;
-               process = memory[i];
-            }
-         }
-      } else if (i == (MEM_SIZE - 1)) {
-         if (memory[i] == -1) {
-            printf("Addresses [%d:%d] Unused\n",start,i);
-         } else {
-            printf("Addresses [%d:%d] Process P%d\n",start,i,memory[i]);
-         }
-      }
-      sFlag = 1;
-   }
-}
-
-void checkInput(char* input, int* memory) {
+void checkInput(char* input, Process** head) {
    char* token;
    char* process;
    char* size;
    char* type;
-   int i = 0;
-   int pid;
-   int length = strlen(input);
-
    token = strtok(input, " ");
-   //printf("%s\n", token);
-   if(!strcmp("RQ", token)) {
+   if (!strcmp("RQ", token)) {
       process = strtok(NULL, " ");
       size = strtok(NULL, " ");
       type = strtok(NULL, " ");
-      pid = atoi(&process[1]);
-      request(memory, pid, size, type);
-   } else if(!strcmp("RL", token)) {
+      request(head, process, atoi(size), type);
+   } else if (!strcmp("RL", token)) {
       process = strtok(NULL, " ");
-      pid = atoi(&process[1]);
-      release(memory, pid);
-   } else if(!strcmp("C\n", token)) {
-      compact(memory);
-   } else if(!strcmp("STAT\n", token)) {
-      report(memory);
+      process[strlen(process)-1] = '\0';
+      release(head, process);
+   } else if (!strcmp("C\n", token)) {
+      compact(head);
+   } else if (!strcmp("STAT\n", token)) {
+      report(*head);
+   } else if (!strcmp("X\n", token)) {
+      exit(1);
    } else {
       printf("Invalid option. Options include:\n");
       printf("\trequest: RQ P# #bytes Strategy(F,B,W)\n");
@@ -298,34 +368,30 @@ void checkInput(char* input, int* memory) {
    }
 }
 
-void main(int argc, char *argv[]) {
-   int max;
-   int quit = 0;
-   int i;
+int main(int argc, char *argv[]) {
    char input[100];
-   if(argc < 2) {
-      printf("Error: Too few arguments.\nUsage: ./allocator <memory size>\n");
+   if (argc < 2) {
+      printf("Error: Too few arguments\nUsage: ./allocator <mem size>\n");
       exit(1);
    } else if (argc > 2) {
-      printf("Error: Too many arguments.\nUsage: ./allocator <memory size>\n");
+      printf("Error: Too many arguments\nUsage: ./allocator <mem size>\n");
       exit(1);
    }
-   MEM_SIZE = atoi(argv[1]);
-   int memory[MEM_SIZE];
-   for (i = 0; i < MEM_SIZE; i++) {
-      memory[i] = -1;
-   }
-   while(!quit) {
+   Process* head = (Process*)malloc(sizeof(Process));
+   head->start = 0;
+   head->end = atoi(argv[1])-1;
+   head->isHole = 1;
+   head->name = (char*)malloc(sizeof(char)*20);
+   head->name = "Unused";
+   head->next = NULL;
+   while (1) {
       printf("allocator> ");
-      if(!fgets(input, 100, stdin)) {
+      if (!fgets(input, 100, stdin)) {
          if (feof(stdin)) {
-            printf("exit\n");
-            break;
+            exit(1);
          }
-      } else if(!strcmp(input, "X\n")) {
-         exit(-1);
       } else {
-         checkInput(input, memory);
+         checkInput(input, &head);
       }
    }
 }

@@ -6,6 +6,8 @@ OBJECTS  = $(SOURCES:.c=.o)
 
 all:$(TARGET)
 
+
+
 $(TARGET):$(OBJECTS)
 	gcc -o  $(TARGET) $(LDFLAGS) $(OBJECTS)
 
