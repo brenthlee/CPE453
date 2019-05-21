@@ -13,8 +13,9 @@ To run individual test/manually:
 
 Struggles:
    Before Pantoja stated that we should use linked list, we already started with an array implementation
-   We got everything to work, but then realized that the max memSize that can be allocated is MAX_INT/sizeof(int), so it would only work with 1/4 of the real maximum
+   We got everything to work, but then realized that the max memSize that can be allocated is way less than the size of the real MAX_INT constant in C.
 
-   Changing it to a linked list implementation made some stuff easier, but also some stuff was more complicated
+   Changing it to a linked list implementation made some stuff easier, but also some stuff was more complicated.
+   Also, changing it to a linked list allowed wayyy more "address space" (bigger memSize) that could be allocated.
    
    There were A LOT of edge cases, and might have still missed some

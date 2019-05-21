@@ -3,6 +3,7 @@
 #include <limits.h>
 #include <string.h>
 
+// Process struct
 typedef struct Process {
    int start;
    int end;
@@ -11,6 +12,7 @@ typedef struct Process {
    struct Process *next;
 } Process;
 
+// worst fit
 void worstFit(Process** head, char* process, int pSize) {
    Process* cur = *head;
    Process* prev = NULL;
@@ -18,6 +20,7 @@ void worstFit(Process** head, char* process, int pSize) {
    int i = 0;
    int mIndex;
    while (cur != NULL) {
+      //finds the biggest hole in list that fits
       if (cur->isHole == 1 && ((cur->end - cur->start + 1) > space)) {
          space = cur->end - cur->start + 1;
          mIndex = i;
@@ -26,6 +29,7 @@ void worstFit(Process** head, char* process, int pSize) {
       prev = cur;
       cur = cur->next;
    }
+   //if the space is big enough for the process size
    if (space >= pSize) {
       cur = *head;
       for (i = 0; i < mIndex; i++) {
@@ -39,38 +43,38 @@ void worstFit(Process** head, char* process, int pSize) {
       newProcess->start = cur->start;
       newProcess->end = newProcess->start + pSize - 1;
       newProcess->isHole = 0;
-      if (cur->start == 0) {
-         if (cur->next != NULL) {
+      if (cur->start == 0) { //if the node is at the head
+         if (cur->next != NULL) { //if there is only one element and it is a hole
             cur->start = newProcess->end + 1;
             newProcess->next = cur;
             (*head) = newProcess;
-            if (cur->start > cur->end) {
+            if (cur->start > cur->end) { //if the hole is completely filled up at one
                newProcess->next = cur->next;
                free(cur);
             }
-         } else {
+         } else { //if it is not at the tail
             cur->start = newProcess->end + 1;
             newProcess->next = cur;
             (*head) = newProcess;
-            if (cur->start > cur->end) {
+            if (cur->start > cur->end) { //if the adjacent hole is completely filled up
                newProcess->next = NULL;
                free(cur);
             }
          }
-      } else {
-         if (cur->next != NULL) {
+      } else { //if the node is not at the head
+         if (cur->next != NULL) { //if it is not at the tail
             cur->start = newProcess->end + 1;
             prev->next = newProcess;
             newProcess->next = cur;
-            if (cur->start > cur->end) {
+            if (cur->start > cur->end) { //if the adjacent hole is completely filled up
                newProcess->next = cur->next;
                free(cur);
             }
-         } else {
+         } else { //if it is at the tail
             cur->start = newProcess->end + 1;
             prev->next = newProcess;
             newProcess->next = cur;
-            if (cur->start > cur->end) {
+            if (cur->start > cur->end) { //if the adjacent hole is completely filled up
                newProcess->next = NULL;
                free(cur);
             }

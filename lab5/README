@@ -1,0 +1,10 @@
+Collaborators:
+   Brent Lee (blee96)
+   Kaitlin Bleich (kbleich)
+
+To run:
+   make clean
+   make
+   ./a.out [filename]
+   (The previous line will produce an output file named output.txt)
+   diff output.txt correct.txt
