@@ -77,7 +77,7 @@ void findPage(FILE* out, int virtMem, char* PT, TLB *tlb,  char* pm, int* oFrame
 		frame = PT[pageNum];
 		tlb->page[tlb->ind] = pageNum;
 		tlb->frame[tlb->ind] = PT[pageNum];
-		tlb->ind = (tlb->ind + 1) % TLB_SIZE;
+		tlb->ind = (tlb->ind + 1) % TLB_SIZE; //FIFO implementation
 	}
 	index = ((unsigned char)frame * MEM_SIZE) + offset;
 	value = *(pm+index);
