@@ -1,60 +1,54 @@
-CC 	= gcc
+CC = gcc
 
-CFLAGS  = -Wall -g -I .
+CFLAGS = -Wall -fPIC -g -I .
 
-LD 	= gcc
+AR = ar r
 
-LDFLAGS  = -Wall -g -L/home/pn-cs453/Given/Asgn2
+RANLIB = ranlib
 
-PUBFILES =  README  hungrymain.c  libPLN.a  libsnakes.a  lwp.h\
-	    numbersmain.c  snakemain.c  snakes.h
+LIBS = liblwp.so
 
-TARGET =  pn-cs453@hornet:Given/asgn2
+OBJS = lwp.o magic64.o rr.o stackStuff.o
 
-PROGS	= snakes nums hungry
+SRCS = lwp.c rr.c threadStuff.c magic64.S
 
-SNAKEOBJS  = snakemain.o 
+HDRS =
 
-HUNGRYOBJS = hungrymain.o 
+EXTRACLEAN = core liblwp.a liblwp.so
 
-NUMOBJS    = numbersmain.o
-
-OBJS	= $(SNAKEOBJS) $(HUNGRYOBJS) $(NUMOBJS) 
-
-SRCS	= snakemain.c numbersmain.c
-
-HDRS	= 
-
-EXTRACLEAN = core $(PROGS)
-
-all: 	$(PROGS)
+all: $(LIBS)
 
 allclean: clean
 	@rm -f $(EXTRACLEAN)
 
-clean:	
-	rm -f $(OBJS) *~ TAGS
+clean:
+	rm -f $(OBJS) liblwp.so *~ TAGS
 
-snakes: snakemain.o libPLN.a libsnakes.a
-	$(LD) $(LDFLAGS) -o snakes snakemain.o -L. -lncurses -lsnakes -lPLN
+$(LIB): $(OBJS)
+	$(AR) $@ $(OBJS)
+	ranlib $@
 
-hungry: hungrymain.o libPLN.a libsnakes.a
-	$(LD) $(LDFLAGS) -o hungry hungrymain.o -L. -lncurses -lsnakes -lPLN
+depend:
+	@echo Regenerating local dependencies
+	@makedpened -Y $(SRCS) $(HDRS)
 
-nums: numbersmain.o libPLN.a 
-	$(LD) $(LDFLAGS) -o nums numbersmain.o -L. -lPLN
+test: nums
+	./nums
 
-hungrymain.o: lwp.h snakes.h
+nums: numbersmain.o liblwp.a
+	$(CC) $(CFLAGS) -g -o nums numbersmain.o -L. -llwp
 
-snakemain.o: lwp.h snakes.h
+numbersmain.o: numbersmain.c
+	$(CC) $(CFLAGS) -c numbersmain.c
 
-numbermain.o: lwp.h
+magic64.o: magic64.S
+	$(CC) $(CFLAGS) -c -o magic64.o magic64.S
 
-#libPLN.a: ../Publish/lwp.c
-#	gcc -c ../Publish/lwp.c
-#	ar r libPLN.a lwp.o
-#	rm lwp.o
+liblwp.so: $(OBJS)
+	$(CC) $(CFLAGS) -shared -o $@ $(OBJS)
 
-pub:
-	scp $(PUBFILES) $(TARGET)
+%.o: %.c
+	$(CC) $(CFLAGS) -m64 -c -o $@ $*.c
 
+lwp.o: threadStuff.h stackStuff.h
+threadStuff.o: threadStuff.h
