@@ -40,20 +40,13 @@
 typedef void (*sigfun)(int signum);
 
 static void install_handler(int sig, sigfun fun);
-static int AlwaysZero();
-
-static int AlwaysZero() {
-   return 0;
-}
 
 int main(int argc, char *argv[]){
   int i,cnt,err;
   snake s[MAXSNAKES];
+
   err = 0;
   for (i=1;i<argc;i++) {                /* check options */
-    if (!strcmp(argv[i],"-z")) {
-      lwp_set_scheduler(AlwaysZero);
-    }
     fprintf(stderr,"%s: unknown option\n",argv[i]);
     err++;
   }
@@ -84,7 +77,8 @@ int main(int argc, char *argv[]){
 
   /* turn each snake loose as an individual LWP */
   for(i=0;i<cnt;i++) {
-    s[i]->lw_pid = lwp_create((lwpfun)run_snake,(void*)(s+i),INITIALSTACK);
+    s[i]->lw_pid = lwp_create((lwpfun)run_hungry_snake,(void*)(s+i),
+                           INITIALSTACK);
   }
 
   lwp_start();                     /* returns when the last lwp exits */
