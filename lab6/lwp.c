@@ -23,7 +23,7 @@ tid_t lwp_create(lwpfun function, void* arg, size_t stackSize) {
       return -1;
    }
    stackPointer = initStack(function, arg, stackPointer);
-   newThread->tid = create_tid(newThread);
+   newThread->tid = createThreadId(newThread);
    newThread->stack = basePointer; //create a stack
    newThread->state.fxsave = FPU_INIT;
    newThread->stacksize = (unsigned)stackSize;

@@ -9,11 +9,11 @@
 static tid_t readThreadId(thread lwp);
 typedef void (*sigfun)(int);
 
-#define NONCEMASK 0x1ffff1
+#define NONCEMASK 0x1fffff
 #define NONCESHIFT 47
 #define THREADMASK (~(NONCEMASK << NONCESHIFT))
 
-tid_t create_tid(thread lwp) {
+tid_t createThreadId(thread lwp) {
    static int nonce;
    nonce++;
    if ((long)lwp & !THREADMASK) {

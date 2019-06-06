@@ -3,7 +3,7 @@
 
    #include "lwp.h"
 
-   tid_t create_tid(thread lwp);
+   tid_t createThreadId(thread lwp);
    thread tid2thread(tid_t threadId);
    int tid2nonce(tid_t threadId);
 

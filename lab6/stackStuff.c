@@ -138,19 +138,6 @@ static void createHandlers() {
       }
    #endif
    if (sigsetjmp(bailbuf, 1) == 42) {
-      tid_t th;
-      int __attribute__ ((unused)) nonce;
-      #ifdef DEBUG
-         th = nonce = -1;
-      #else
-         th = lwp_gettid();
-      #endif
-      #if defined(__x86_64)
-         nonce = tid2nonce(th);
-         fprintf(stderr, "Stack overflow detected.\n");
-      #else
-         fprintf(stderr, "Stack overflow detected.\n");
-      #endif
       lwp_exit();
    }
 }
