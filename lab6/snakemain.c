@@ -40,20 +40,12 @@
 typedef void (*sigfun)(int signum);
 
 static void install_handler(int sig, sigfun fun);
-static int AlwaysZero();
-
-static int AlwaysZero() {
-   return 0;
-}
 
 int main(int argc, char *argv[]){
   int i,cnt,err;
   snake s[MAXSNAKES];
   err = 0;
   for (i=1;i<argc;i++) {                /* check options */
-    if (!strcmp(argv[i],"-z")) {
-      lwp_set_scheduler(AlwaysZero);
-    }
     fprintf(stderr,"%s: unknown option\n",argv[i]);
     err++;
   }
