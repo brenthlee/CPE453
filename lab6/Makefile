@@ -22,7 +22,7 @@ allclean: clean
 	@rm -f $(EXTRACLEAN)
 
 clean:
-	rm -f $(OBJS) liblwp.so *~ TAGS
+	rm -f $(OBJS) liblwp.so *.gch *~ TAGS
 
 $(LIB): $(OBJS)
 	$(AR) $@ $(OBJS)
