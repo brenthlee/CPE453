@@ -41,7 +41,7 @@ static unsigned long* initStack(lwpfun function, void* arg, unsigned long* stack
    stackPointer--;
    *stackPointer = (unsigned long)(function);
    stackPointer--;
-   *stackPointer = (unsigned long)(0xDEADBEEF);
+   *stackPointer = (unsigned long)(0xDEADBEEF); //used to align. Used from shown code in class
    tmpBasePointer = stackPointer;
    return tmpBasePointer;
 }
